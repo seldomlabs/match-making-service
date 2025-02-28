@@ -1,0 +1,144 @@
+package com.matchmaker.common.db.domain;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Optional;
+
+import javax.persistence.Column;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.matchmaker.common.constants.CommonColumnNames;
+import com.matchmaker.common.dto.CommonDto;
+
+/**
+ * Abstract JPA super class with generic ID.
+ * 
+ * @author abhishek
+ * 		
+ */
+@MappedSuperclass
+@EntityListeners({ AbstractJpaEntity.AbstractEntityListener.class })
+@SuppressWarnings("serial")
+public abstract class AbstractJpaEntity implements CommonDto, Serializable
+{
+	
+	public static class AbstractEntityListener
+	{
+		
+		// This code is executed on every insert.
+		@PrePersist
+		public void onPrePersist(AbstractJpaEntity abstractEntity)
+		{
+			abstractEntity.initEntity();
+		}
+		
+		// This code is executed on every update.
+		@PreUpdate
+		public void onPreUpdate(AbstractJpaEntity abstractEntity)
+		{
+			abstractEntity.preUpdate();
+		}
+	}
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
+	
+	//@JsonIgnore
+	@XmlTransient
+	public long getId()
+	{
+		return id;
+	}
+	
+	public void setId(long id)
+	{
+		this.id = id;
+	}
+	
+	@Column(name = CommonColumnNames.CreateDate)//, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date createDate;
+	
+	@Column(name = CommonColumnNames.UpdateDate)//, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date updateDate;
+	
+	@Column(name = CommonColumnNames.Shadowed)//, columnDefinition = "BOOLEAN DEFAULT 0")
+	private boolean shadowed;
+	
+	//@JsonIgnore
+	@XmlTransient
+	public Date getUpdateDate()
+	{
+		return updateDate;
+	}
+	
+	public void setUpdateDate(Date updateDate)
+	{
+		this.updateDate = updateDate;
+	}
+	
+	/**
+	 * @return the createDate
+	 */
+	//@JsonIgnore
+	@XmlTransient
+	public Date getCreateDate()
+	{
+		return createDate;
+	}
+	
+	public void setCreateDate(Date createDate)
+	{
+		this.createDate = createDate;
+	}
+	
+	public boolean isShadowed()
+	{
+		return shadowed;
+	}
+	
+	public void setShadowed(boolean shadowed)
+	{
+		this.shadowed = shadowed;
+	}
+	
+	void initEntity()
+	{
+		createDate = updateDate = Optional.ofNullable(this.createDate).orElse(new Date());
+	}
+	
+	void preUpdate()
+	{
+		updateDate = new Date();
+	}
+	
+
+	public boolean isNewInstance()
+	{
+		return this.getCreateDate() == null;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof AbstractJpaEntity)
+		{
+			if (id != 0)
+			{
+				return id == (((AbstractJpaEntity) obj).id);
+			}
+		}
+		return false;
+	}
+}
