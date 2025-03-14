@@ -23,5 +23,16 @@ public class RandomUtils {
 	public static String getUUID() {
         return UUID.randomUUID().toString();
     }
+
+	public static String generateUUIDWithTimestamp() {
+		// Get the current timestamp in milliseconds
+		long timestamp = System.currentTimeMillis();
+
+		// Generate a random UUID
+		UUID uuid = UUID.randomUUID();
+
+		// Combine the timestamp and UUID
+		return timestamp + "-" + uuid.toString();
+	}
 	
 }

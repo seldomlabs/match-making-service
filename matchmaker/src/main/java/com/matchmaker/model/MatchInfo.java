@@ -19,8 +19,8 @@ public class MatchInfo extends AbstractJpaEntity {
     @Column(name = "meeting_lon")
     private Double meetingLon;
 
-    @Column(name = "request_id")
-    private String requestId;
+    @Column(name = "match_id")
+    private String matchId;
 
     public String getMatchStatus() {
         return matchStatus;
@@ -46,11 +46,11 @@ public class MatchInfo extends AbstractJpaEntity {
         this.meetingLon = meetingLon;
     }
 
-    public String getRequestId() {
-        return requestId;
+    public String getMatchId() {
+        return matchId;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
     }
 }

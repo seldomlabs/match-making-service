@@ -13,8 +13,8 @@ public class UserMatchMapping extends AbstractJpaEntity {
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "match_id")
-    private Long matchId;
+    @Column(name = "match_info_id")
+    private Long matchInfoId;
 
     public String getUserId() {
         return userId;
@@ -24,11 +24,11 @@ public class UserMatchMapping extends AbstractJpaEntity {
         this.userId = userId;
     }
 
-    public Long getMatchId() {
-        return matchId;
+    public Long getMatchInfoId() {
+        return matchInfoId;
     }
 
-    public void setMatchId(Long matchId) {
-        this.matchId = matchId;
+    public void setMatchInfoId(Long matchInfoId) {
+        this.matchInfoId = matchInfoId;
     }
 }

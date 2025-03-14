@@ -57,25 +57,18 @@ public class MatchHelperService {
         return activeUsersMap;
     }
 
-    public void postMatchAction(String userGeoHash, String matchedUserGeoHash, String userId, String matchedUserId) {
+    public void postMatchAction(String userGeoHash, String matchedUserGeoHash, String userId, String matchedUserId, String matchId) {
         try {
+            logger.info("userGeoHash" + userGeoHash);
+            logger.info("userGeoHash" + matchedUserGeoHash);
             geoHashRedisService.removeMemberFromSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(userGeoHash), userId);
             geoHashRedisService.removeMemberFromSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(matchedUserGeoHash), matchedUserId);
             geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserMatch(userId), matchedUserId);
             geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserMatch(matchedUserId), userId);
+            geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserMatchId(matchedUserId), matchId);
+            geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserMatchId(userId), matchId);
         } catch (Exception e) {
             logger.error("Exception in postMatchAction", e);
-        }
-    }
-
-    public void addUserToHashIfFailed(String userGeoHash, String matchedUserGeoHash, String userId, String matchedUserId) {
-        try {
-            geoHashRedisService.addMemberToSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(userGeoHash), userId);
-            geoHashRedisService.addMemberToSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(matchedUserGeoHash), matchedUserId);
-            geoHashRedisService.deleteKey(GeoHashRedisService.getKeyForUserMatch(userId));
-            geoHashRedisService.deleteKey(GeoHashRedisService.getKeyForUserMatch(matchedUserId));
-        } catch (Exception e) {
-            logger.error("Exception in addUserToHashIfFailed", e);
         }
     }
 }

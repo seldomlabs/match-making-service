@@ -52,6 +52,10 @@ public class GeoHashRedisService {
         return "USER_MATCH_LIMIT_DAILY_" + userId;
     }
 
+    public static String getKeyForUserMatchId(String userId) {
+        return "USER_MATCH_ID_" + userId;
+    }
+
     public List<String> getDataForKeys(String[] keys) throws ApplicationException {
         if (keys.length == 0)
             return null;
@@ -118,6 +122,20 @@ public class GeoHashRedisService {
         }
     }
 
+    public void setKey(String key, String value, int expiry) throws ApplicationException {
+        if (value == null) return;
+        try (Jedis jedis = redisService.getResourceForUrlWithPort(REDIS_URL, REDIS_PORT, REDIS_PASSWORD)) {
+            if (jedis == null) {
+                logger.error("redis not available");
+                throw new ApplicationException("redis not available");
+            }
+            jedis.setex(key, expiry, value);
+        } catch (Exception e) {
+            logger.error("Error fetching redis", e);
+            throw new ApplicationException("error while putting in redis");
+        }
+    }
+
     public String getKey(String key) throws ApplicationException {
         String data = null;
         try (Jedis jedis = redisService.getResourceForUrlWithPort(REDIS_URL, REDIS_PORT, REDIS_PASSWORD)) {
@@ -164,6 +182,9 @@ public class GeoHashRedisService {
             if (jedis == null) {
                 logger.error("redis not available");
                 throw new ApplicationException("redis not available");
+            }
+            if (!jedis.exists(key)) {
+                return;
             }
             if (cnt > 0) {
                 jedis.incr(key);

@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@PropertySource("file:/opt/match-making/db.properties")
+@PropertySource("file:/Users/harsh.shukla/match-service-properties/db.properties")
 public class DataSourceConfig {
 
     private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);

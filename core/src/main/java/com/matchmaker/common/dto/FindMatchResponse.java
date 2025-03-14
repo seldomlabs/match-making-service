@@ -5,7 +5,7 @@ public class FindMatchResponse extends MPResponse {
 
     private String matchedUserId;
 
-    private Long matchId;
+    private String matchId;
 
     public String getMatchedUserId() {
         return matchedUserId;
@@ -15,11 +15,11 @@ public class FindMatchResponse extends MPResponse {
         this.matchedUserId = matchedUserId;
     }
 
-    public Long getMatchId() {
+    public String getMatchId() {
         return matchId;
     }
 
-    public void setMatchId(Long matchId) {
+    public void setMatchId(String matchId) {
         this.matchId = matchId;
     }
 }

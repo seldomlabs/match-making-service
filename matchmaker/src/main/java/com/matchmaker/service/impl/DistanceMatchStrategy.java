@@ -10,6 +10,7 @@ import com.matchmaker.service.UserService;
 import com.matchmaker.service.lock.FindMatchLock;
 import com.matchmaker.util.GeoUtils;
 import com.matchmaker.util.H3Utility;
+import com.matchmaker.util.RandomUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +42,22 @@ public class DistanceMatchStrategy implements MatchStrategy {
         BestMatchResponse bestMatchResponse = new BestMatchResponse();
         bestMatchResponse.setStatus(MPResponseStatus.FAILURE.name());
 
+        String userIdToMatch = bestMatchRequestDto.getUserIdToMatch();
         Double currentUserLat = bestMatchRequestDto.getUserLat();
         Double currentUserLon = bestMatchRequestDto.getUserLon();
-        String userIdToMatch = bestMatchRequestDto.getUserIdToMatch();
         String userGeoHash = bestMatchRequestDto.getUserGeoHash();
+
+        BestMatchResponse existingMatchResponse = createMatchResponseIfExists(userIdToMatch);
+        if (MPResponseStatus.SUCCESS.name().equalsIgnoreCase(existingMatchResponse.getStatus())) {
+            return existingMatchResponse;
+        }
         List<String> activeUsersInRadius = bestMatchRequestDto.getActiveUsersInRadius();
-        activeUsersInRadius = activeUsersInRadius.stream().filter(userId -> !userId.equalsIgnoreCase(userIdToMatch)).collect(Collectors.toList());
+        //remove the user from activeUsersInRadius for which you are finding match
+        activeUsersInRadius = activeUsersInRadius.stream().filter(userInRadius -> !userIdToMatch.equalsIgnoreCase(userInRadius)).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(activeUsersInRadius)) {
+            bestMatchResponse.setMessage("No active users in the current set radius");
+            return bestMatchResponse;
+        }
         Map<String, UserDetailsDto> userDetailsMap = userService.fetchUserLocation(activeUsersInRadius);
         activeUsersInRadius = activeUsersInRadius.stream().filter(userDetailsMap::containsKey).collect(Collectors.toList());
         try{logger.info("activeUsersInRadius{}", GlobalConstants.objectMapper.writeValueAsString(activeUsersInRadius));} catch (Exception ignore) {}
@@ -55,52 +66,60 @@ public class DistanceMatchStrategy implements MatchStrategy {
             return bestMatchResponse;
         }
         List<String> sortedUserList = sortUsersOnDistance(currentUserLat, currentUserLon, activeUsersInRadius, userDetailsMap);
-        String bestMatch = null;
-        for (String possibleMatchUserId : sortedUserList) {
-            UserDetailsDto userDetails;
-            if (!findMatchLock.takeLock(userIdToMatch)) {
-                bestMatchResponse.setMessage("Unable to take lock on user");
-                return bestMatchResponse;
-            }
-            if (!findMatchLock.takeLock(possibleMatchUserId)) {
-                bestMatchResponse.setMessage("Unable to take lock on possible match");
-                return bestMatchResponse;
-            }
-            try {
-                String bestMatchForCurrentUser = getUserMatchIfExists(userIdToMatch);
-                if (bestMatchForCurrentUser != null) {
-                    bestMatch = bestMatchForCurrentUser;
-                    break;
-                }
-                String bestMatchForPossibleMatch = getUserMatchIfExists(possibleMatchUserId);
-                if (bestMatchForPossibleMatch != null) {
-                    continue;
-                }
-                bestMatch = possibleMatchUserId;
-                userDetails = userDetailsMap.get(bestMatch);
-                Double bestMatchUserLat = userDetails.getLat();
-                Double bestMatchUserLon = userDetails.getLon();
-                String bestMatchGeoHash = H3Utility.latLonToH3(bestMatchUserLat, bestMatchUserLon, MatchmakingConstants.H3_RESOLUTION);
-                matchHelperService.postMatchAction(userGeoHash, bestMatchGeoHash, userIdToMatch, bestMatch);
-                break;
-            } finally {
-                findMatchLock.releaseLock(userIdToMatch);
-                findMatchLock.releaseLock(possibleMatchUserId);
-            }
-        }
-        if (bestMatch == null) {
-            bestMatchResponse.setMessage("Unable to find match");
+        if (!findMatchLock.takeLock(userIdToMatch)) {
+            bestMatchResponse.setMessage("Unable to take lock on user");
             return bestMatchResponse;
         }
+        try {
+            existingMatchResponse = createMatchResponseIfExists(userIdToMatch);
+            if (MPResponseStatus.SUCCESS.name().equalsIgnoreCase(existingMatchResponse.getStatus())) {
+                return existingMatchResponse;
+            }
+            for (String possibleMatchUserId : sortedUserList) {
+                UserDetailsDto userDetails;
+                if (!findMatchLock.takeLock(possibleMatchUserId)) {
+                    bestMatchResponse.setMessage("Unable to take lock on possible match");
+                    continue;
+                }
+                try {
+                    String bestMatchForPossibleMatch = getUserMatchIfExists(possibleMatchUserId);
+                    if (bestMatchForPossibleMatch != null) {
+                        continue;
+                    }
+                    userDetails = userDetailsMap.get(possibleMatchUserId);
+                    Double bestMatchUserLat = userDetails.getLat();
+                    Double bestMatchUserLon = userDetails.getLon();
+                    String bestMatchGeoHash = H3Utility.latLonToH3(bestMatchUserLat, bestMatchUserLon, MatchmakingConstants.H3_RESOLUTION);
+                    String matchId = RandomUtils.generateUUIDWithTimestamp();
+                    matchHelperService.postMatchAction(userGeoHash, bestMatchGeoHash, userIdToMatch, possibleMatchUserId, matchId);
+                    bestMatchResponse.setMatchedUserId(possibleMatchUserId);
+                    bestMatchResponse.setMatchId(matchId);
+                    bestMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
+                    return bestMatchResponse;
+                } finally {
+                    findMatchLock.releaseLock(possibleMatchUserId);
+                }
+            }
+        } finally {
+            findMatchLock.releaseLock(userIdToMatch);
+        }
         try{logger.info("Final user details list {}", GlobalConstants.objectMapper.writeValueAsString(userDetailsMap));} catch (Exception ignore) {}
-        bestMatchResponse.setMatchedUserId(bestMatch);
-        bestMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
+        bestMatchResponse.setMessage("Unable to find match");
         return bestMatchResponse;
     }
 
     private String getUserMatchIfExists(String userId) {
         try {
             return geoHashRedisService.getKey(GeoHashRedisService.getKeyForUserMatch(userId));
+        } catch (Exception e) {
+            logger.error("Exception in getUserMatchIfExists", e);
+        }
+        return null;
+    }
+
+    private String getUserMatchIdIfExists(String userId) {
+        try {
+            return geoHashRedisService.getKey(GeoHashRedisService.getKeyForUserMatchId(userId));
         } catch (Exception e) {
             logger.error("Exception in getUserMatchIfExists", e);
         }
@@ -151,5 +170,21 @@ public class DistanceMatchStrategy implements MatchStrategy {
             }
         }
         return minDist;
+    }
+
+    private BestMatchResponse createMatchResponseIfExists(String userId) {
+        BestMatchResponse bestMatchResponse = new BestMatchResponse();
+        bestMatchResponse.setStatus(MPResponseStatus.FAILURE.name());
+
+        String bestMatchForCurrentUser = getUserMatchIfExists(userId);
+        if (bestMatchForCurrentUser == null) {
+            bestMatchResponse.setMessage("No match exists for the user");
+            return bestMatchResponse;
+        }
+        String matchId = getUserMatchIdIfExists(userId);
+        bestMatchResponse.setMatchId(matchId);
+        bestMatchResponse.setMatchedUserId(bestMatchForCurrentUser);
+        bestMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
+        return bestMatchResponse;
     }
 }

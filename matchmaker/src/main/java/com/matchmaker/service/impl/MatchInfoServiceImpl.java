@@ -4,7 +4,6 @@ import com.matchmaker.common.db.service.CommonDbService;
 import com.matchmaker.common.dto.MatchInfoAddRequest;
 import com.matchmaker.common.dto.MatchInfoAddResponse;
 import com.matchmaker.common.dto.MPResponseStatus;
-import com.matchmaker.common.dto.UserMatchConstraintsDto;
 import com.matchmaker.dao.MatchInfoDao;
 import com.matchmaker.model.MatchInfo;
 import com.matchmaker.model.UserMatchMapping;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 @Service("matchInfoServiceImpl")
@@ -35,35 +33,35 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         MatchInfoAddResponse createMatchResponse = new MatchInfoAddResponse();
         createMatchResponse.setStatus(MPResponseStatus.FAILURE.name());
 
-        String requestId = request.getRequestId();
-        MatchInfo matchInfo = matchInfoDao.getMatchInfoFromRequestId(requestId);
+        String matchId = request.getMatchId();
+        MatchInfo matchInfo = matchInfoDao.getMatchInfoFromMatchId(matchId);
         if (matchInfo != null) {
-            createMatchResponse.setMatchId(matchInfo.getId());
+            createMatchResponse.setMatchId(matchId);
             createMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
             return createMatchResponse;
         }
-        matchInfo = setMatchInfo(request.getMeetingLat(), request.getMeetingLon(), requestId);
+        matchInfo = setMatchInfo(request.getMeetingLat(), request.getMeetingLon(), matchId);
         setUserMatchMapping(request.getUsers(), matchInfo.getId());
         updateUserMatchLimits(request.getUsers(), 1);
 
-        createMatchResponse.setMatchId(matchInfo.getId());
+        createMatchResponse.setMatchId(matchId);
         createMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
         return createMatchResponse;
     }
 
-    private MatchInfo setMatchInfo(Double meetingLat, Double meetingLon, String requestId) throws Exception {
+    private MatchInfo setMatchInfo(Double meetingLat, Double meetingLon, String matchId) throws Exception {
         MatchInfo matchInfo = new MatchInfo();
         matchInfo.setMeetingLat(meetingLat);
         matchInfo.setMeetingLon(meetingLon);
-        matchInfo.setRequestId(requestId);
+        matchInfo.setMatchId(matchId);
         matchInfo = commonDbService.updateEntity(matchInfo);
         return matchInfo;
     }
 
-    private void setUserMatchMapping(List<String> userList, Long matchId) throws Exception {
+    private void setUserMatchMapping(List<String> userList, Long matchInfoId) throws Exception {
         for (String userId : userList) {
             UserMatchMapping userMatchMapping = new UserMatchMapping();
-            userMatchMapping.setMatchId(matchId);
+            userMatchMapping.setMatchInfoId(matchInfoId);
             userMatchMapping.setUserId(userId);
             commonDbService.updateEntity(userMatchMapping);
         }

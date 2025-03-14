@@ -6,6 +6,8 @@ public class BestMatchResponse extends MPResponse {
 
     private String matchedUserId;
 
+    private String matchId;
+
     public String getUserId() {
         return userId;
     }
@@ -20,5 +22,13 @@ public class BestMatchResponse extends MPResponse {
 
     public void setMatchedUserId(String matchedUserId) {
         this.matchedUserId = matchedUserId;
+    }
+
+    public String getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
     }
 }

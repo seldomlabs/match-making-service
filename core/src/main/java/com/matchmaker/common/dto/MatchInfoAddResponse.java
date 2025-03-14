@@ -2,13 +2,13 @@ package com.matchmaker.common.dto;
 
 public class MatchInfoAddResponse extends MPResponse {
 
-    private Long matchId;
+    private String matchId;
 
-    public Long getMatchId() {
+    public String getMatchId() {
         return matchId;
     }
 
-    public void setMatchId(Long matchId) {
+    public void setMatchId(String matchId) {
         this.matchId = matchId;
     }
 }

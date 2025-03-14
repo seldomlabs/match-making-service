@@ -17,8 +17,8 @@ public class MatchInfoAddRequest {
     private List<String> users;
 
     @NotNull(message = GlobalConstants.ValidationMessages.DATA_INVALID)
-    @NotEmpty(message = "Request ID cannot be empty")
-    private String requestId;
+    @NotEmpty(message = "Match ID cannot be empty")
+    private String matchId;
 
     public Double getMeetingLat() {
         return meetingLat;
@@ -44,49 +44,11 @@ public class MatchInfoAddRequest {
         this.users = users;
     }
 
-    public String getRequestId() {
-        return requestId;
+    public String getMatchId() {
+        return matchId;
     }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
-    public MatchInfoAddRequest(MatchInfoAddRequest.CreateMatchRequestBuilder createMatchRequestBuilder) {
-        this.meetingLat = createMatchRequestBuilder.meetingLat;
-        this.meetingLon = createMatchRequestBuilder.meetingLon;
-        this.users = createMatchRequestBuilder.users;
-        this.requestId = createMatchRequestBuilder.requestId;
-    }
-
-    public static class CreateMatchRequestBuilder {
-        private Double meetingLat;
-        private Double meetingLon;
-        private String requestId;
-        private List<String> users;
-
-        public CreateMatchRequestBuilder meetingLat(Double meetingLat) {
-            this.meetingLat = meetingLat;
-            return this;
-        }
-
-        public CreateMatchRequestBuilder meetingLon(Double meetingLon) {
-            this.meetingLon = meetingLon;
-            return this;
-        }
-
-        public CreateMatchRequestBuilder users(List<String> users) {
-            this.users = users;
-            return this;
-        }
-
-        public CreateMatchRequestBuilder requestId(String requestId) {
-            this.requestId = requestId;
-            return this;
-        }
-
-        public MatchInfoAddRequest build(){
-            return new MatchInfoAddRequest(this);
-        }
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
     }
 }

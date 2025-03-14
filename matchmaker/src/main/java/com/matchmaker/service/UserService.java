@@ -38,6 +38,7 @@ public class UserService {
         } catch (Exception e) {
             logger.error("Exception in getUserData", e);
         }
+
         return null;
     }
 

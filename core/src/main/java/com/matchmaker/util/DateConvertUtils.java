@@ -1,10 +1,15 @@
 package com.matchmaker.util;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 public class DateConvertUtils {
+
+    public static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static String DATE_FORMAT = "yyyy-MM-dd";
 
     public static Date getStartOfDate(Date currDate) {
         // Create a Calendar instance and set the time to the current date
@@ -36,4 +41,8 @@ public class DateConvertUtils {
         return calendar.getTime();
     }
 
+    public static Date getDateFromString(String dateString, String format) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        return formatter.parse(dateString);
+    }
 }

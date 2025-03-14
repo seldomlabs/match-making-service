@@ -1,7 +1,7 @@
 package com.matchmaker.service;
 
-import com.matchmaker.common.dto.UserMatchConstraintsDto;
 import com.matchmaker.dao.MatchInfoDao;
+import com.matchmaker.util.DateConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,27 +16,27 @@ public class UserMatchConstraintService {
     @Autowired
     MatchInfoDao matchInfoDao;
 
-    public int getUserAvailableDailyMatchLimit(String userId, UserMatchConstraintsDto userMatchConstraints) throws Exception {
-        String key = GeoHashRedisService.getKeyForUserDailyMatchLimit(userId);
-        String value = geoHashRedisService.getKey(key);
-        if (value != null) {
-            return Integer.parseInt(value);
+    public int getUserMatchCount(String userId, Date startDate, Date endDate) throws Exception {
+        String key = GeoHashRedisService.getKeyForUserMatchLimit(userId);
+        String availableMatchesString = geoHashRedisService.getKey(key);
+        if (availableMatchesString != null) {
+            return Integer.parseInt(availableMatchesString);
         }
-        int userMatchCount = matchInfoDao.getUserMatchCountForDay(userId);
-        int availableDailyMatchLimit = userMatchConstraints.getMatchLimitPerDay() - userMatchCount;
-        geoHashRedisService.setKey(key, String.valueOf(availableDailyMatchLimit));
-        return availableDailyMatchLimit;
+        long expiry = (endDate.getTime() - startDate.getTime()) / 1000;
+        int availableMatches = matchInfoDao.getUserMatchCountInDate(userId, startDate, endDate);
+        geoHashRedisService.setKey(key, String.valueOf(availableMatches), (int) expiry);
+        return availableMatches;
     }
 
-    public int getUserAvailableMatchLimit(String userId, Date startDate, UserMatchConstraintsDto userMatchConstraints) throws Exception {
-        String key = GeoHashRedisService.getKeyForUserMatchLimit(userId);
-        String value = geoHashRedisService.getKey(key);
-        if (value != null) {
-            return Integer.parseInt(value);
+    public int getUserDailyMatchCount(String userId) throws Exception {
+        String key = GeoHashRedisService.getKeyForUserDailyMatchLimit(userId);
+        String availableDailyMatchesString = geoHashRedisService.getKey(key);
+        if (availableDailyMatchesString != null) {
+            return Integer.parseInt(availableDailyMatchesString);
         }
-        int userMatchCount = matchInfoDao.getUserMatchCountInDate(userId, startDate, new Date());
-        int availableMatchLimit = userMatchConstraints.getMatchLimit() - userMatchCount;
-        geoHashRedisService.setKey(key, String.valueOf(availableMatchLimit));
-        return availableMatchLimit;
+        int availableMatches = matchInfoDao.getUserMatchCountForDay(userId);
+        long expiry = (DateConvertUtils.getEndOfDate(new Date()).getTime() - new Date().getTime()) / 1000;
+        geoHashRedisService.setKey(key, String.valueOf(availableMatches), (int) expiry);
+        return availableMatches;
     }
 }

@@ -64,6 +64,7 @@ public class BestMatchRequestDto {
         this.userLat = bestMatchRequestDtoBuilder.userLat;
         this.userLon = bestMatchRequestDtoBuilder.userLon;
         this.userIdToMatch = bestMatchRequestDtoBuilder.userIdToMatch;
+        this.userGeoHash = bestMatchRequestDtoBuilder.userGeoHash;
     }
 
     public static class BestMatchRequestDtoBuilder {
