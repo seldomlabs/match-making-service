@@ -47,7 +47,7 @@ public class ApplicationProperties
 	
 	private static final Logger logger = LogManager.getLogger(ApplicationProperties.class);
 	
-	private static final String PROPERTIES_FILE_LOCATION = "/Users/harsh.shukla/match-service-properties/properties";
+	private static final String PROPERTIES_FILE_LOCATION = "/opt/match-making/properties";
 	
 	private static final String PROPERTIES_FILE_LOCATION_DEFAULT = "/properties";
 	
