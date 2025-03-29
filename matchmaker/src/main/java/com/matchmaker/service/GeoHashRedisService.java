@@ -44,12 +44,12 @@ public class GeoHashRedisService {
         return "USER_MATCH_" + userId;
     }
 
-    public static String getKeyForUserMatchLimit(String userId) {
-        return "USER_MATCH_LIMIT_" + userId;
+    public static String getKeyForUserMatchCount(String userId) {
+        return "USER_MATCH_COUNT_" + userId;
     }
 
-    public static String getKeyForUserDailyMatchLimit(String userId) {
-        return "USER_MATCH_LIMIT_DAILY_" + userId;
+    public static String getKeyForUserDailyMatchCount(String userId) {
+        return "USER_DAILY_MATCH_COUNT_" + userId;
     }
 
     public static String getKeyForUserMatchId(String userId) {

@@ -4,25 +4,29 @@ import com.matchmaker.common.EnumValue;
 import com.matchmaker.common.constants.MatchmakingConstants;
 import com.matchmaker.constants.GlobalConstants;
 
-import javax.validation.constraints.*;
-import java.util.List;
-import java.util.Set;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
-public class MatchInfoAddRequest {
-
-    private Double meetingLat;
-
-    private Double meetingLon;
-
-    @NotNull(message = GlobalConstants.ValidationMessages.DATA_INVALID)
-    private Set<String> users;
+public class UpdateMatchInfoRequest {
 
     @NotNull(message = GlobalConstants.ValidationMessages.DATA_INVALID)
     @NotEmpty(message = "Match ID cannot be empty")
     private String matchId;
 
+    private Double meetingLat;
+
+    private Double meetingLon;
+
     @EnumValue(enumClass = MatchmakingConstants.MatchStatus.class, message = "Invalid status. Must be PENDING, CONFIRMED, CANCELED, MET.")
     private String matchStatus;
+
+    public String getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(String matchId) {
+        this.matchId = matchId;
+    }
 
     public Double getMeetingLat() {
         return meetingLat;
@@ -38,22 +42,6 @@ public class MatchInfoAddRequest {
 
     public void setMeetingLon(Double meetingLon) {
         this.meetingLon = meetingLon;
-    }
-
-    public Set<String> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<String> users) {
-        this.users = users;
-    }
-
-    public String getMatchId() {
-        return matchId;
-    }
-
-    public void setMatchId(String matchId) {
-        this.matchId = matchId;
     }
 
     public String getMatchStatus() {

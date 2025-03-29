@@ -1,9 +1,6 @@
 package com.matchmaker.controller;
 
-import com.matchmaker.common.dto.MatchInfoAddRequest;
-import com.matchmaker.common.dto.MatchInfoAddResponse;
-import com.matchmaker.common.dto.FindMatchResponse;
-import com.matchmaker.common.dto.FindMatchRequest;
+import com.matchmaker.common.dto.*;
 import com.matchmaker.constants.RequestURI;
 import com.matchmaker.service.MatchInfoService;
 import com.matchmaker.service.MatchService;
@@ -33,8 +30,15 @@ public class MatchController {
 
     @RequestMapping(method = RequestMethod.POST, value = RequestURI.SET_MATCH_INFO_API)
     @ResponseBody
-    ResponseEntity<MatchInfoAddResponse> setMatchInfo(@RequestBody MatchInfoAddRequest request) throws Exception {
+    ResponseEntity<MatchInfoAddResponse> setMatchInfo(@Valid @RequestBody MatchInfoAddRequest request) throws Exception {
         MatchInfoAddResponse response = matchInfoService.setMatchInfo(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestURI.UPDATE_MATCH_INFO_API)
+    @ResponseBody
+    ResponseEntity<MatchInfoAddResponse> updateMatchInfo(@Valid @RequestBody UpdateMatchInfoRequest request) throws Exception {
+        MatchInfoAddResponse response = matchInfoService.updateMatchInfo(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -8,6 +8,7 @@ import com.matchmaker.service.MatchHelperService;
 import com.matchmaker.service.MatchStrategy;
 import com.matchmaker.service.UserService;
 import com.matchmaker.service.lock.FindMatchLock;
+import com.matchmaker.util.DateConvertUtils;
 import com.matchmaker.util.GeoUtils;
 import com.matchmaker.util.H3Utility;
 import com.matchmaker.util.RandomUtils;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import com.matchmaker.common.constants.MatchmakingConstants.MatchStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,13 +49,10 @@ public class DistanceMatchStrategy implements MatchStrategy {
         Double currentUserLon = bestMatchRequestDto.getUserLon();
         String userGeoHash = bestMatchRequestDto.getUserGeoHash();
 
-        BestMatchResponse existingMatchResponse = createMatchResponseIfExists(userIdToMatch);
-        if (MPResponseStatus.SUCCESS.name().equalsIgnoreCase(existingMatchResponse.getStatus())) {
-            return existingMatchResponse;
-        }
         List<String> activeUsersInRadius = bestMatchRequestDto.getActiveUsersInRadius();
-        //remove the user from activeUsersInRadius for which you are finding match
-        activeUsersInRadius = activeUsersInRadius.stream().filter(userInRadius -> !userIdToMatch.equalsIgnoreCase(userInRadius)).collect(Collectors.toList());
+        //remove the users (for ex: users which have cancel this user in previous match) from activeUsersInRadius
+        activeUsersInRadius = matchHelperService.removeUsersFromActiveUsersInRadius(activeUsersInRadius, userIdToMatch);
+
         if (CollectionUtils.isEmpty(activeUsersInRadius)) {
             bestMatchResponse.setMessage("No active users in the current set radius");
             return bestMatchResponse;
@@ -71,7 +70,7 @@ public class DistanceMatchStrategy implements MatchStrategy {
             return bestMatchResponse;
         }
         try {
-            existingMatchResponse = createMatchResponseIfExists(userIdToMatch);
+            BestMatchResponse existingMatchResponse = matchHelperService.createMatchResponseIfExists(userIdToMatch);
             if (MPResponseStatus.SUCCESS.name().equalsIgnoreCase(existingMatchResponse.getStatus())) {
                 return existingMatchResponse;
             }
@@ -82,7 +81,7 @@ public class DistanceMatchStrategy implements MatchStrategy {
                     continue;
                 }
                 try {
-                    String bestMatchForPossibleMatch = getUserMatchIfExists(possibleMatchUserId);
+                    String bestMatchForPossibleMatch = matchHelperService.getUserMatchIfExists(possibleMatchUserId);
                     if (bestMatchForPossibleMatch != null) {
                         continue;
                     }
@@ -106,24 +105,6 @@ public class DistanceMatchStrategy implements MatchStrategy {
         try{logger.info("Final user details list {}", GlobalConstants.objectMapper.writeValueAsString(userDetailsMap));} catch (Exception ignore) {}
         bestMatchResponse.setMessage("Unable to find match");
         return bestMatchResponse;
-    }
-
-    private String getUserMatchIfExists(String userId) {
-        try {
-            return geoHashRedisService.getKey(GeoHashRedisService.getKeyForUserMatch(userId));
-        } catch (Exception e) {
-            logger.error("Exception in getUserMatchIfExists", e);
-        }
-        return null;
-    }
-
-    private String getUserMatchIdIfExists(String userId) {
-        try {
-            return geoHashRedisService.getKey(GeoHashRedisService.getKeyForUserMatchId(userId));
-        } catch (Exception e) {
-            logger.error("Exception in getUserMatchIfExists", e);
-        }
-        return null;
     }
 
     private List<String> sortUsersOnDistance(Double currentUserLat, Double currentUserLon, List<String> userList,
@@ -170,21 +151,5 @@ public class DistanceMatchStrategy implements MatchStrategy {
             }
         }
         return minDist;
-    }
-
-    private BestMatchResponse createMatchResponseIfExists(String userId) {
-        BestMatchResponse bestMatchResponse = new BestMatchResponse();
-        bestMatchResponse.setStatus(MPResponseStatus.FAILURE.name());
-
-        String bestMatchForCurrentUser = getUserMatchIfExists(userId);
-        if (bestMatchForCurrentUser == null) {
-            bestMatchResponse.setMessage("No match exists for the user");
-            return bestMatchResponse;
-        }
-        String matchId = getUserMatchIdIfExists(userId);
-        bestMatchResponse.setMatchId(matchId);
-        bestMatchResponse.setMatchedUserId(bestMatchForCurrentUser);
-        bestMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
-        return bestMatchResponse;
     }
 }

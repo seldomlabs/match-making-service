@@ -45,4 +45,15 @@ public class DateConvertUtils {
         SimpleDateFormat formatter = new SimpleDateFormat(format);
         return formatter.parse(dateString);
     }
+
+    public static Date getDateByOffset(int daysOffset) {
+        // Get the current date
+        Calendar calendar = Calendar.getInstance();
+
+        // Add or subtract the specified number of days
+        calendar.add(Calendar.DATE, daysOffset);
+
+        // Return the resulting Date object
+        return calendar.getTime();
+    }
 }

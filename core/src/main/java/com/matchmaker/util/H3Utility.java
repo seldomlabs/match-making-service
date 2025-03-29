@@ -36,14 +36,12 @@ public class H3Utility {
     public static List<String> getH3IndicesInRadius(double lat, double lon, int resolution, int radius) {
         String h3Index = latLonToH3(lat, lon, resolution);
         int depth = getDepthFromRadius(radius);
-        logger.info("depth is" + depth);
         assert h3 != null;
         return h3.gridDisk(h3Index, depth);
     }
 
     public static List<String> getH3IndicesInRadius(String h3Index, Integer radius) {
         int depth = getDepthFromRadius(radius);
-        logger.info("depth is" + depth);
         assert h3 != null;
         return h3.gridDisk(h3Index, depth);
     }

@@ -15,8 +15,6 @@ public class FindMatchRequest {
     @NotNull(message = GlobalConstants.ValidationMessages.DATA_INVALID)
     private Double lon;
 
-    private Integer matchRadius;
-
     public String getUserId() {
         return userId;
     }
@@ -39,13 +37,5 @@ public class FindMatchRequest {
 
     public void setLat(Double lat) {
         this.lat = lat;
-    }
-
-    public Integer getMatchRadius() {
-        return matchRadius;
-    }
-
-    public void setMatchRadius(Integer matchRadius) {
-        this.matchRadius = matchRadius;
     }
 }

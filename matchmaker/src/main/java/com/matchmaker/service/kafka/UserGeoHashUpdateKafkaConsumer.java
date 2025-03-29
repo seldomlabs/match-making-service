@@ -29,14 +29,13 @@ public class UserGeoHashUpdateKafkaConsumer {
             UserGeoHashUpdateEventDto request = GlobalConstants.objectMapper.readValue(message, UserGeoHashUpdateEventDto.class);
             String operation = request.getOperation();
             String userId = request.getUserId();
-            setUserLocationInRedis(request.getUserId(), request.getLat(), request.getLon());
             if ("add".equalsIgnoreCase(operation)) {
-                String geoHashUser = H3Utility.latLonToH3(request.getLat(), request.getLon(), MatchmakingConstants.H3_RESOLUTION);
-                geoHashRedisService.addMemberToSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(geoHashUser), userId);
-                geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserGeoHashMapping(userId), geoHashUser);
+                setUserLocationInRedis(request.getUserId(), request.getLat(), request.getLon());
+                removeUserFromActiveGeoHashSet(userId);
+                addUserToActiveUserGeoHashSet(userId, request.getLat(), request.getLon());
             } else if ("remove".equalsIgnoreCase(operation)) {
-                String geoHashUser = geoHashRedisService.getKey(userId);
-                geoHashRedisService.removeMemberFromSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(geoHashUser), userId);
+                removeUserFromActiveGeoHashSet(userId);
+                geoHashRedisService.deleteKey(GeoHashRedisService.getKeyForUserLocation(userId));
             }
         } catch (Exception e) {
             logger.error("Exception in userGeoHashUpdate", e);
@@ -49,6 +48,19 @@ public class UserGeoHashUpdateKafkaConsumer {
         userDetails.setLat(lat);
         userDetails.setLon(lon);
         userDetails.setUserId(userId);
+        logger.info("user details " + GlobalConstants.objectMapper.writeValueAsString(userDetails));
         geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserLocation(userId), GlobalConstants.objectMapper.writeValueAsString(userDetails));
+    }
+
+    private void addUserToActiveUserGeoHashSet(String userId, Double lat, Double lon) throws Exception {
+        String geoHashUser = H3Utility.latLonToH3(lat, lon, MatchmakingConstants.H3_RESOLUTION);
+        geoHashRedisService.addMemberToSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(geoHashUser), userId);
+        geoHashRedisService.setKey(GeoHashRedisService.getKeyForUserGeoHashMapping(userId), geoHashUser);
+    }
+
+    private void removeUserFromActiveGeoHashSet(String userId) throws Exception {
+        String geoHashUser = geoHashRedisService.getKey(GeoHashRedisService.getKeyForUserGeoHashMapping(userId));
+        geoHashRedisService.removeMemberFromSet(GeoHashRedisService.getKeyForActiveUsersGeoHashSet(geoHashUser), userId);
+        geoHashRedisService.deleteKey(GeoHashRedisService.getKeyForUserGeoHashMapping(userId));
     }
 }
