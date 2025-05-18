@@ -8,9 +8,9 @@ import com.matchmaker.constants.GlobalConstants;
 import com.matchmaker.service.*;
 import com.matchmaker.util.DateConvertUtils;
 import com.matchmaker.util.H3Utility;
-import jodd.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.solr.common.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ public class MatchServiceImpl implements MatchService {
         response.setStatus(MPResponseStatus.FAILURE.name());
 
         String userId = request.getUserId();
-        if (StringUtil.isEmpty(userId)) {
+        if (StringUtils.isEmpty(userId)) {
             throw new BadRequestException("User id is required");
         }
         BestMatchResponse existingMatchResponse = matchHelperService.createMatchResponseIfExists(userId);
