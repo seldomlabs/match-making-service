@@ -2,7 +2,7 @@ package com.matchmaker.common.dto;
 
 import com.matchmaker.constants.GlobalConstants;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class FindMatchRequest {
 

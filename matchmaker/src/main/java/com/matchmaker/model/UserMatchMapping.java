@@ -2,9 +2,9 @@ package com.matchmaker.model;
 
 import com.matchmaker.common.db.domain.AbstractJpaEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user_match_mapping")

@@ -2,8 +2,8 @@ package com.matchmaker.common.db;
 
 import java.sql.SQLException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;

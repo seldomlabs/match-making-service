@@ -72,7 +72,7 @@ public class RedisLock {
      * @return String held against the key which is being locked.
      */
     protected String getLockValue() {
-        String lockValue = (new Long(Thread.currentThread().getId())).toString();
+        String lockValue = ((Long) (Thread.currentThread().getId())).toString();
         String processName = ManagementFactory.getRuntimeMXBean().getName();
         if (StringUtils.isNotEmpty(processName)) {
             lockValue = String.join("_",processName,lockValue);

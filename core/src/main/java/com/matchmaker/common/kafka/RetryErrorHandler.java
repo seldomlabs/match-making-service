@@ -1,5 +1,6 @@
 package com.matchmaker.common.kafka;
 
+import com.matchmaker.constants.GlobalConstants;
 import com.matchmaker.util.MetricsUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -7,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.ErrorHandler;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class RetryErrorHandler implements ErrorHandler {
+public class RetryErrorHandler extends DefaultErrorHandler {
 
     Logger logger = LogManager.getLogger(RetryErrorHandler.class);
 
@@ -29,7 +30,7 @@ public class RetryErrorHandler implements ErrorHandler {
     public RetryErrorHandler() {
     }
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = GlobalConstants.objectMapper;
 
     /**
      * On error in Kafka Consumer, it will increase the retry count and send it again to the topic for retry.

@@ -4,7 +4,8 @@ import com.matchmaker.common.EnumValue;
 import com.matchmaker.common.constants.MatchmakingConstants;
 import com.matchmaker.constants.GlobalConstants;
 
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 

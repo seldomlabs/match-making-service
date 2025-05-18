@@ -424,9 +424,9 @@ public class ApplicationUtil
 			// System.out.println(obj);
 			// Field field = TestTable.class.getDeclaredField("lastName");
 			// Annotation annotation =
-			// field.getAnnotation(javax.persistence.Column.class);
-			// if (annotation instanceof javax.persistence.Column) {
-			// javax.persistence.Column columnDef = (javax.persistence.Column)
+			// field.getAnnotation(jakarta.persistence.Column.class);
+			// if (annotation instanceof jakarta.persistence.Column) {
+			// jakarta.persistence.Column columnDef = (jakarta.persistence.Column)
 			// annotation;
 			// System.out.println(columnDef.name());
 			// }

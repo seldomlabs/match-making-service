@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import com.matchmaker.common.db.domain.AbstractJpaEntity;
 import com.matchmaker.common.dto.CommonDto;

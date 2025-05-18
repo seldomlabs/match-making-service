@@ -1,6 +1,6 @@
 package com.matchmaker.common.db.domain;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @MappedSuperclass
 public  class AbstractJpaArchiveEntity extends AbstractJpaEntity {
