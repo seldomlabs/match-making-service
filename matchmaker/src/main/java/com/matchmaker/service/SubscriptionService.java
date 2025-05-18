@@ -24,7 +24,7 @@ public class SubscriptionService {
     public UserSubscriptionDetailsResponse getUserSubscriptionDetails(String userId) {
         try {
             URIBuilder url = new URIBuilder(ExternalUrls.GET_USER_SUBSCRIPTION_DATA_URL);
-            url.setPath(userId);
+            url.setPath("/" + userId);
             String response = HttpCallsService.makeGetRequestWithTimeout(url.build().toString(), 500);
             UserSubscriptionDetailsResponse subscriptionDetailsResponse = GlobalConstants.objectMapper.readValue(response, UserSubscriptionDetailsResponse.class);
             if (MPResponseStatus.SUCCESS.name().equals(subscriptionDetailsResponse.getStatus())) {
