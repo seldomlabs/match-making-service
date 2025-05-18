@@ -27,7 +27,7 @@ public class UserService {
         try {
             URIBuilder url = new URIBuilder(ExternalUrls.GET_USER_DATA_URL);
             url.addParameter("ids", GlobalConstants.objectMapper.writeValueAsString(Collections.singletonList(userId)));
-            String response = HttpCallsService.makeGetRequestWithTimeout(url.toString(), 500);
+            String response = HttpCallsService.makeGetRequestWithTimeout(url.build().toString(), 500);
             BulkUserDetailsResponse bulkUserDetailsResponse = GlobalConstants.objectMapper.readValue(response, BulkUserDetailsResponse.class);
             if (MPResponseStatus.SUCCESS.name().equals(bulkUserDetailsResponse.getStatus())) {
                 Map<String, UserDetailsDto> userDetailsMap = bulkUserDetailsResponse.getUserDetails();
@@ -45,7 +45,7 @@ public class UserService {
         try {
             URIBuilder url = new URIBuilder(ExternalUrls.GET_USER_DATA_URL);
             url.addParameter("ids", GlobalConstants.objectMapper.writeValueAsString(userList));
-            String response = HttpCallsService.makeGetRequestWithTimeout(url.toString(), 500);
+            String response = HttpCallsService.makeGetRequestWithTimeout(url.build().toString(), 500);
             BulkUserDetailsResponse bulkUserDetailsResponse = GlobalConstants.objectMapper.readValue(response, BulkUserDetailsResponse.class);
             if (MPResponseStatus.SUCCESS.name().equals(bulkUserDetailsResponse.getStatus())) {
                 return bulkUserDetailsResponse.getUserDetails();
