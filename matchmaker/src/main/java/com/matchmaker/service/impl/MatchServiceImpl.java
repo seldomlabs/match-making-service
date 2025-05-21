@@ -92,6 +92,10 @@ public class MatchServiceImpl implements MatchService {
         mpResponse.setStatus(MPResponseStatus.FAILURE.name());
 
         UserSubscriptionDetailsResponse subscriptionDetailsResponse = subscriptionService.getUserSubscriptionDetails(userId);
+        if (!MPResponseStatus.SUCCESS.name().equalsIgnoreCase(subscriptionDetailsResponse.getStatus())){
+            mpResponse.setMessage("Match limits validation failed");
+            return mpResponse;
+        }
         Date subscriptionStartDate = subscriptionDetailsResponse.getSubscriptionStartDate();
         Date subscriptionEndDate = subscriptionDetailsResponse.getSubscriptionEndDate();
         Integer totalMatchLimits = subscriptionDetailsResponse.getTotalMatchLimits();
