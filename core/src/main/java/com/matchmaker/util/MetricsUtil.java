@@ -30,7 +30,7 @@ public class MetricsUtil {
 	}
 
 	public static void publishTimeMetricForCoupon(String metricName, long timeInMs) {
-		ThreadConstants.COUPON_METRICS_PUSH.submit(() -> {
+		ThreadConstants.SET_USER_MATCH_COUNT_BATCH_EXECUTOR.submit(() -> {
 			double duration = (double) timeInMs;
 			duration = duration / 1000;
 			ControllerAuditService.requestLatencyHistogram.labels(metricName).observe(duration);

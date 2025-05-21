@@ -10,7 +10,5 @@ public class ThreadConstants {
 		return (ThreadPoolExecutor) Executors.newFixedThreadPool(fixedSize);
 	}
 
-	public static final ThreadPoolExecutor AEROSPIKE_BATCH_EXECUTOR = getDefaultFixed(30);
-
-	public static final ThreadPoolExecutor COUPON_METRICS_PUSH = getDefaultFixed(20);
+	public static final ThreadPoolExecutor SET_USER_MATCH_COUNT_BATCH_EXECUTOR = getDefaultFixed(30);
 }

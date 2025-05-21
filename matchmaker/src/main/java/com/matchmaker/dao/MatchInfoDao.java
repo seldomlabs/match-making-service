@@ -40,12 +40,18 @@ public class MatchInfoDao {
 
     public int getUserMatchCountInDate(String userId, Date startDate, Date endDate) throws Exception {
         String query = "select um.user_id,count(*) from match_info m left join user_match_mapping um on m.id = um.match_info_id" +
-                " where um.user_id = :user_id and m.created_at >= :start_date and m.created_at <= :end_date";
+                " where um.user_id = :user_id";
         Map<String, Object> queryMap = new HashMap<>();
         queryMap.put("user_id", userId);
-        queryMap.put("start_date", startDate);
-        queryMap.put("end_date", endDate);
 
+        if (startDate != null) {
+            query += " and m.created_at >= :start_date";
+            queryMap.put("start_date", startDate);
+        }
+        if (endDate != null) {
+            query += " and m.created_at <= :end_date";
+            queryMap.put("end_date", endDate);
+        }
         List<Object[]> result = commonDao.findByQuery(query, queryMap, 0, 0);
         logger.info(GlobalConstants.objectMapper.writeValueAsString(result));
         if (result.isEmpty() || result.get(0) == null) {
