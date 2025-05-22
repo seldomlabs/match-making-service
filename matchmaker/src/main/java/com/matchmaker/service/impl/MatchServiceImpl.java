@@ -50,6 +50,7 @@ public class MatchServiceImpl implements MatchService {
         if (MPResponseStatus.SUCCESS.name().equalsIgnoreCase(existingMatchResponse.getStatus())) {
             response.setMatchId(existingMatchResponse.getMatchId());
             response.setMatchedUserId(existingMatchResponse.getMatchedUserId());
+            response.setStatus(MPResponseStatus.SUCCESS.name());
             return response;
         }
         MPResponse matchLimitsValidationResponse = validateMatchLimits(userId);
