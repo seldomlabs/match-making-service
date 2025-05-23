@@ -86,7 +86,9 @@ public class MatchHelperService {
         Date cancelDateThreshold = DateConvertUtils.getDateByOffset(MatchmakingConstants.CANCEL_MATCH_CHECK_DAYS_THRESHOLD * -1);
         try {
             Set<String> userAlreadyCanceled = getMatchedUsersForStatusInStartDate(userId, MatchmakingConstants.MatchStatus.CANCELED.name(), cancelDateThreshold);
-            activeUsersInRadius = activeUsersInRadius.stream().filter(userInRadius -> !userId.equalsIgnoreCase(userInRadius)).filter(userInRadius -> !userAlreadyCanceled.contains(userInRadius)).collect(Collectors.toList());
+            activeUsersInRadius = activeUsersInRadius.stream().filter(userInRadius -> !userInRadius.equalsIgnoreCase(userId))
+                    .filter(userInRadius -> !userAlreadyCanceled.contains(userInRadius))
+                    .collect(Collectors.toList());
             return activeUsersInRadius;
         } catch (Exception e) {
             logger.error("Exception in removeUsersFromActiveUsersInRadius", e);
@@ -119,7 +121,7 @@ public class MatchHelperService {
         return bestMatchResponse;
     }
 
-    private String getUserMatchIdIfExists(String userId) {
+    public String getUserMatchIdIfExists(String userId) {
         try {
             return geoHashRedisService.getKey(GeoHashRedisService.getKeyForUserMatchId(userId));
         } catch (Exception e) {

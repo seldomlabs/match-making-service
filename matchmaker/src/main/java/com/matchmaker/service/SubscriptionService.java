@@ -23,8 +23,9 @@ public class SubscriptionService {
 
     public UserSubscriptionDetailsResponse getUserSubscriptionDetails(String userId) {
         try {
-            String url = ExternalUrls.GET_USER_SUBSCRIPTION_DATA_URL + "/" + userId;
-            String response = HttpCallsService.makeGetRequestWithTimeout(url, 500);
+            URIBuilder url = new URIBuilder(ExternalUrls.GET_USER_SUBSCRIPTION_DATA_URL);
+            url.setPath(url.getPath() + "/" + userId);
+            String response = HttpCallsService.makeGetRequestWithTimeout(url.build().toString(), 500);
             return GlobalConstants.objectMapper.readValue(response, UserSubscriptionDetailsResponse.class);
         } catch (Exception e) {
             logger.error("Exception in getUserSubscriptionDetails", e);

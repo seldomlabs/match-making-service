@@ -41,4 +41,11 @@ public class MatchController {
         MatchInfoAddResponse response = matchInfoService.updateMatchInfo(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestURI.GET_USER_MATCH_INFO_API)
+    @ResponseBody
+    ResponseEntity<UserMatchInfoResponse> getUserMatchInfo(@RequestParam String userId) throws Exception {
+        UserMatchInfoResponse response = matchInfoService.getUserMatchInfo(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

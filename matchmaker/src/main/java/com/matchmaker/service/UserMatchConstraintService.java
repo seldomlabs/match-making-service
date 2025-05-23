@@ -34,7 +34,7 @@ public class UserMatchConstraintService {
             logger.error("Exception while getting user match count from redis ", e);
         }
         int userMatchCount = matchInfoDao.getUserMatchCountInDate(userId, startDate, endDate);
-        Integer expiry = endDate != null ? (int) (endDate.getTime() - startDate.getTime()) / 1000 : null;
+        Integer expiry = endDate != null ? (int) (endDate.getTime() - new Date().getTime()) / 1000 : null;
         setMatchCountKeyInRedisAsync(key, expiry, userMatchCount);
         return userMatchCount;
     }

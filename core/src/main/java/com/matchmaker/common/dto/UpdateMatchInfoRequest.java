@@ -7,6 +7,8 @@ import com.matchmaker.constants.GlobalConstants;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Date;
+
 public class UpdateMatchInfoRequest {
 
     @NotNull(message = GlobalConstants.ValidationMessages.DATA_INVALID)
@@ -19,6 +21,8 @@ public class UpdateMatchInfoRequest {
 
     @EnumValue(enumClass = MatchmakingConstants.MatchStatus.class, message = "Invalid status. Must be PENDING, CONFIRMED, CANCELED, MET.")
     private String matchStatus;
+
+    private Date meetingTime;
 
     public String getMatchId() {
         return matchId;
@@ -50,5 +54,13 @@ public class UpdateMatchInfoRequest {
 
     public void setMatchStatus(String matchStatus) {
         this.matchStatus = matchStatus;
+    }
+
+    public Date getMeetingTime() {
+        return meetingTime;
+    }
+
+    public void setMeetingTime(Date meetingTime) {
+        this.meetingTime = meetingTime;
     }
 }

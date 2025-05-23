@@ -2,10 +2,9 @@ package com.matchmaker.service.impl;
 
 import com.matchmaker.common.constants.MatchmakingConstants.MatchStatus;
 import com.matchmaker.common.db.service.CommonDbService;
-import com.matchmaker.common.dto.MatchInfoAddRequest;
-import com.matchmaker.common.dto.MatchInfoAddResponse;
-import com.matchmaker.common.dto.MPResponseStatus;
-import com.matchmaker.common.dto.UpdateMatchInfoRequest;
+import com.matchmaker.common.dto.*;
+import com.matchmaker.common.exception.ApplicationException;
+import com.matchmaker.common.exception.NotFoundException;
 import com.matchmaker.dao.MatchInfoDao;
 import com.matchmaker.model.MatchInfo;
 import com.matchmaker.model.UserMatchMapping;
@@ -51,7 +50,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         matchInfo = setMatchInfo(request.getMeetingLat(), request.getMeetingLon(), matchId, request.getMatchStatus());
         setUserMatchMapping(request.getUsers(), matchInfo.getId());
         updateUserMatchCounts(request.getUsers(), 1);
-        matchHelperService.removeUsersMatchIdKeyFromRedis(request.getUsers());
+        //matchHelperService.removeUsersMatchIdKeyFromRedis(request.getUsers());
 
         createMatchResponse.setMatchId(matchId);
         createMatchResponse.setStatus(MPResponseStatus.SUCCESS.name());
@@ -83,6 +82,9 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         }
         if (request.getMeetingLon() != null) {
             matchInfo.setMeetingLon(request.getMeetingLon());
+        }
+        if (request.getMeetingTime() != null) {
+            matchInfo.setMeetingTime(request.getMeetingTime());
         }
         if (MatchStatus.CANCELED.name().equalsIgnoreCase(request.getMatchStatus())) {
             matchHelperService.removeUsersMatchRelatedKeysFromRedis(matchId);
@@ -117,5 +119,30 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             geoHashRedisService.updateCount(GeoHashRedisService.getKeyForUserMatchCount(userId), cnt);
             geoHashRedisService.updateCount(GeoHashRedisService.getKeyForUserDailyMatchCount(userId), cnt);
         }
+    }
+
+    @Override
+    public UserMatchInfoResponse getUserMatchInfo(String userId) throws Exception {
+        UserMatchInfoResponse userMatchInfoResponse = new UserMatchInfoResponse();
+        userMatchInfoResponse.setStatus(MPResponseStatus.FAILURE.name());
+
+        BestMatchResponse bestMatchResponse = matchHelperService.createMatchResponseIfExists(userId);
+        if (MPResponseStatus.FAILURE.name().equalsIgnoreCase(bestMatchResponse.getStatus())) {
+            userMatchInfoResponse.setMessage(bestMatchResponse.getMessage());
+            return userMatchInfoResponse;
+        }
+        MatchInfo matchInfo = matchInfoDao.getMatchInfoFromMatchId(bestMatchResponse.getMatchId());
+        if (matchInfo == null) {
+            userMatchInfoResponse.setMessage("Match info does not exists");
+            return userMatchInfoResponse;
+        }
+        userMatchInfoResponse.setMatchedUserId(bestMatchResponse.getMatchedUserId());
+        userMatchInfoResponse.setMatchTime(matchInfo.getCreateDate());
+        userMatchInfoResponse.setMeetingLat(matchInfo.getMeetingLat());
+        userMatchInfoResponse.setMeetingLon(matchInfo.getMeetingLon());
+        userMatchInfoResponse.setMeetingTime(matchInfo.getMeetingTime());
+        userMatchInfoResponse.setMatchStatus(matchInfo.getMatchStatus());
+        userMatchInfoResponse.setStatus(MPResponseStatus.SUCCESS.name());
+        return userMatchInfoResponse;
     }
 }

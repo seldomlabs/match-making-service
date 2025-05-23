@@ -48,9 +48,9 @@ public class MatchServiceImpl implements MatchService {
         }
         BestMatchResponse existingMatchResponse = matchHelperService.createMatchResponseIfExists(userId);
         if (MPResponseStatus.SUCCESS.name().equalsIgnoreCase(existingMatchResponse.getStatus())) {
+            response.setStatus(MPResponseStatus.SUCCESS.name());
             response.setMatchId(existingMatchResponse.getMatchId());
             response.setMatchedUserId(existingMatchResponse.getMatchedUserId());
-            response.setStatus(MPResponseStatus.SUCCESS.name());
             return response;
         }
         MPResponse matchLimitsValidationResponse = validateMatchLimits(userId);
@@ -93,7 +93,7 @@ public class MatchServiceImpl implements MatchService {
         mpResponse.setStatus(MPResponseStatus.FAILURE.name());
 
         UserSubscriptionDetailsResponse subscriptionDetailsResponse = subscriptionService.getUserSubscriptionDetails(userId);
-        if (!MPResponseStatus.SUCCESS.name().equalsIgnoreCase(subscriptionDetailsResponse.getStatus())){
+        if (!MPResponseStatus.SUCCESS.name().equalsIgnoreCase(subscriptionDetailsResponse.getStatus())) {
             mpResponse.setMessage("Match limits validation failed");
             return mpResponse;
         }
