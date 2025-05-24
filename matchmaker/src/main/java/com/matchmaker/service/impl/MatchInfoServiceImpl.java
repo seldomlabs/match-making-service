@@ -142,6 +142,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         userMatchInfoResponse.setMeetingLon(matchInfo.getMeetingLon());
         userMatchInfoResponse.setMeetingTime(matchInfo.getMeetingTime());
         userMatchInfoResponse.setMatchStatus(matchInfo.getMatchStatus());
+        userMatchInfoResponse.setMatchId(matchInfo.getMatchId());
         userMatchInfoResponse.setStatus(MPResponseStatus.SUCCESS.name());
         return userMatchInfoResponse;
     }
