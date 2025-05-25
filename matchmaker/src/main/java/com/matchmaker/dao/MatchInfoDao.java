@@ -5,6 +5,7 @@ import com.matchmaker.common.db.dao.CommonDao;
 import com.matchmaker.common.db.service.CommonDbService;
 import com.matchmaker.constants.GlobalConstants;
 import com.matchmaker.model.MatchInfo;
+import com.matchmaker.model.UserMatchMapping;
 import com.matchmaker.util.DateConvertUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -109,5 +110,12 @@ public class MatchInfoDao {
             }
         }
         return userIds;
+    }
+
+    public List<UserMatchMapping> getUserMatchMappingForMatchInfoId(Long matchInfoId) throws Exception{
+        String query = "select ump from UserMatchMapping ump where ump.matchInfoId = :match_info_id";
+        Map<String, Object> queryMap = new HashMap<>();
+        queryMap.put("match_info_id", matchInfoId);
+        return commonDbService.selectByCriteria(UserMatchMapping.class, query, queryMap);
     }
 }

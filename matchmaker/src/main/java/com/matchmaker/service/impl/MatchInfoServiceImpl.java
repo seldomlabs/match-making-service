@@ -11,13 +11,12 @@ import com.matchmaker.model.UserMatchMapping;
 import com.matchmaker.service.GeoHashRedisService;
 import com.matchmaker.service.MatchHelperService;
 import com.matchmaker.service.MatchInfoService;
+import com.matchmaker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service("matchInfoServiceImpl")
 public class MatchInfoServiceImpl implements MatchInfoService {
@@ -33,6 +32,9 @@ public class MatchInfoServiceImpl implements MatchInfoService {
 
     @Autowired
     MatchHelperService matchHelperService;
+
+    @Autowired
+    UserService userService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -106,10 +108,16 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     }
 
     private void setUserMatchMapping(Set<String> userList, Long matchInfoId) throws Exception {
+        Map<String, UserDetailsDto> userDetailsMap = userService.fetchUserLocation(new ArrayList<>(userList));
         for (String userId : userList) {
             UserMatchMapping userMatchMapping = new UserMatchMapping();
             userMatchMapping.setMatchInfoId(matchInfoId);
             userMatchMapping.setUserId(userId);
+            UserDetailsDto userDetailsDto = userDetailsMap.get(userId);
+            if (userDetailsDto != null) {
+                userMatchMapping.setUserLat(userDetailsDto.getLat());
+                userMatchMapping.setUserLon(userDetailsDto.getLon());
+            }
             commonDbService.updateEntity(userMatchMapping);
         }
     }
@@ -136,6 +144,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             userMatchInfoResponse.setMessage("Match info does not exists");
             return userMatchInfoResponse;
         }
+        List<UserMatchMapping> userMatchMappingList = matchInfoDao.getUserMatchMappingForMatchInfoId(matchInfo.getId());
         userMatchInfoResponse.setMatchedUserId(bestMatchResponse.getMatchedUserId());
         userMatchInfoResponse.setMatchTime(matchInfo.getCreateDate());
         userMatchInfoResponse.setMeetingLat(matchInfo.getMeetingLat());
@@ -143,6 +152,15 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         userMatchInfoResponse.setMeetingTime(matchInfo.getMeetingTime());
         userMatchInfoResponse.setMatchStatus(matchInfo.getMatchStatus());
         userMatchInfoResponse.setMatchId(matchInfo.getMatchId());
+        for (UserMatchMapping userMatchMapping : userMatchMappingList) {
+            if (userId.equalsIgnoreCase(userMatchMapping.getUserId())) {
+                userMatchInfoResponse.setUserLatOnMatch(userMatchMapping.getUserLat());
+                userMatchInfoResponse.setUserLonOnMatch(userMatchMapping.getUserLon());
+            } else {
+                userMatchInfoResponse.setMatchedUserLatOnMatch(userMatchMapping.getUserLat());
+                userMatchInfoResponse.setMatchedUserLonOnMatch(userMatchMapping.getUserLon());
+            }
+        }
         userMatchInfoResponse.setStatus(MPResponseStatus.SUCCESS.name());
         return userMatchInfoResponse;
     }

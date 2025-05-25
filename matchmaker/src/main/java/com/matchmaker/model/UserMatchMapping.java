@@ -16,6 +16,12 @@ public class UserMatchMapping extends AbstractJpaEntity {
     @Column(name = "match_info_id")
     private Long matchInfoId;
 
+    @Column(name = "user_lat")
+    private Double userLat;
+
+    @Column(name = "user_lon")
+    private Double userLon;
+
     public String getUserId() {
         return userId;
     }
@@ -30,5 +36,21 @@ public class UserMatchMapping extends AbstractJpaEntity {
 
     public void setMatchInfoId(Long matchInfoId) {
         this.matchInfoId = matchInfoId;
+    }
+
+    public Double getUserLat() {
+        return userLat;
+    }
+
+    public void setUserLat(Double userLat) {
+        this.userLat = userLat;
+    }
+
+    public Double getUserLon() {
+        return userLon;
+    }
+
+    public void setUserLon(Double userLon) {
+        this.userLon = userLon;
     }
 }

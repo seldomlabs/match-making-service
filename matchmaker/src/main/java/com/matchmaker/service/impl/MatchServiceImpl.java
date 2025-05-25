@@ -8,9 +8,9 @@ import com.matchmaker.constants.GlobalConstants;
 import com.matchmaker.service.*;
 import com.matchmaker.util.DateConvertUtils;
 import com.matchmaker.util.H3Utility;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.solr.common.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
